@@ -373,7 +373,7 @@ gemm(char transA, char transB, int m, int n, int k,
 
 int main(int argc, char** argv)
 {
-  int m = 25600;
+  int m = 4096;
   if (argc >= 2)
     sscanf(argv[1], "%d", &m);
 
