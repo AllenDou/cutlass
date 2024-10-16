@@ -286,9 +286,9 @@ gemm_nt(int m, int n, int k,
   auto tB = make_layout(make_shape(Int<32>{}, Int< 8>{}));   // (n,k) -> thr_idx
   auto tC = make_layout(make_shape(Int<16>{}, Int<16>{}));   // (m,n) -> thr_idx
 
-  dim3 dimBlock(size(tC));
-  dim3 dimGrid(size(ceil_div(M, bM)),
-               size(ceil_div(N, bN)));
+  dim3 dimBlock(size(tC)); /* 16*16 = 256 */
+  dim3 dimGrid(size(ceil_div(M, bM)), /* 4096/128 = 32 */
+               size(ceil_div(N, bN)));/* 4096/128 = 32 */
   gemm_device<<<dimGrid, dimBlock, 0, stream>>>
       (prob_shape, cta_tiler,
        A, dA, sA, tA,
