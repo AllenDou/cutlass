@@ -39,18 +39,23 @@ cutlass_example_add_executable(
 )
 
 cutlass_example_add_executable(
-  zixiao_test1
-  zixiao_test1.cu
+  zixiao_test_shape_layout
+  zixiao_test_shape_layout.cu
 )
 
 cutlass_example_add_executable(
-  zixiao_test2
-  zixiao_test2.cu
+  zixiao_test_register_global
+  zixiao_test_register_global.cu
 )
 
 cutlass_example_add_executable(
-  zixiao_test3
-  zixiao_test3.cu
+  zixiao_test_copy
+  zixiao_test_copy.cu
+)
+
+cutlass_example_add_executable(
+  zixiao_test_mma
+  zixiao_test_mma.cu
 )
 
 cutlass_example_add_executable(
