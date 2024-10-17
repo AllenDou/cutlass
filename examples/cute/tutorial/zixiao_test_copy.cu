@@ -29,10 +29,10 @@ __global__ void copy_global_shm_register(const T *Aptr)
 
     auto rA = make_tensor_like(gA);
 
-    G2SCopy g2s_tiled_copy;
-    auto g2s_thr_copy = g2s_tiled_copy.get_slice(idx);
-    auto tAgA = g2s_thr_copy.partition_S(gA);
-    auto tAsA = g2s_thr_copy.partition_D(sA);
+    G2SCopy g2s_tiled_copy;/* 这个实例 代表我后续要做一个cp动作 */
+    auto g2s_thr_copy = g2s_tiled_copy.get_slice(idx); /*获取当前线程的cp */
+    auto tAgA = g2s_thr_copy.partition_S(gA); /* 当前线程的cp source*/
+    auto tAsA = g2s_thr_copy.partition_D(sA); /* 当前线程的cp destination*/
     cute::copy(g2s_tiled_copy, tAgA, tAsA);
 
     S2RCopy s2r_tiled_copy;
@@ -70,6 +70,7 @@ int main()
     }
 
     int sharedMemPerBlock;
+    /*获取shared memory size*/
     err = cudaDeviceGetAttribute(&sharedMemPerBlock, cudaDevAttrMaxSharedMemoryPerBlock, device);
     if (err != cudaSuccess)
     {
@@ -153,7 +154,7 @@ int main()
     int count = 100;
     for (int i = 0; i < count; ++i)
     {
-        copy_global_shm_register<T, G2SCopy, S2RCopy, SmemLayout, M, N><<<1, block, shm_size>>>(Aptr);
+        copy_global_shm_register<T, G2SCopy, S2RCopy, SmemLayout, M, N><<<1/*gridDim*/, block/*128个线程*/, shm_size>>>(Aptr);
     }
     cudaEventRecord(end);
     cudaEventSynchronize(end);
