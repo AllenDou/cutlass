@@ -44,6 +44,11 @@ cutlass_example_add_executable(
 )
 
 cutlass_example_add_executable(
+  zixiao_test2
+  zixiao_test2.cu
+)
+
+cutlass_example_add_executable(
   sgemm_2
   sgemm_2.cu
 )
