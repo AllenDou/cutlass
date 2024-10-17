@@ -23,11 +23,11 @@ __global__ void mma_simple(T *Cptr, const T *Aptr, const T *Bptr)
     Tensor B = make_tensor(make_gmem_ptr(Bptr), make_shape(Int<N>{}, Int<K>{}), make_stride(Int<K>{}, Int<1>{}));
     Tensor C = make_tensor(make_gmem_ptr(Cptr), make_shape(Int<M>{}, Int<N>{}), make_stride(Int<N>{}, Int<1>{}));
 
-    auto tAgA = thr_mma.partition_A(A);
+    auto tAgA = thr_mma.partition_A(A); /* 当前线程 从global mem的A 获取一个partition  还是在global memory上 */
     auto tBgB = thr_mma.partition_B(B);
     auto tCgC = thr_mma.partition_C(C);
 
-    auto tArA = thr_mma.partition_fragment_A(A);
+    auto tArA = thr_mma.partition_fragment_A(A); /* 当前线程从global mem的A获取一个fragment 存在register里 */
     auto tBrB = thr_mma.partition_fragment_B(B);
     auto tCrC = thr_mma.partition_fragment_C(C);
 
@@ -49,7 +49,7 @@ __global__ void mma_simple(T *Cptr, const T *Aptr, const T *Bptr)
         PRINT("tCrC.shape", tCrC.shape());
     }
 
-    cute::copy(tAgA, tArA);
+    cute::copy(tAgA, tArA); /* 把global的A cp到 register的A */
     cute::copy(tBgB, tBrB);
     clear(tCrC);
 
