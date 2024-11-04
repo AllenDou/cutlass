@@ -304,14 +304,14 @@ gemm_nt(int m, int n, int k,
 #endif
 
 #if 0
-  print_latex(copyA);
-  print_latex(copyB);
+  //print_latex(copyA);
+  //print_latex(copyB);
   print_latex(mmaC);
 #endif
 
-  dim3 dimBlock(size(mmaC));
-  dim3 dimGrid(size(ceil_div(M, bM)),
-               size(ceil_div(N, bN)));
+  dim3 dimBlock(size(mmaC)); /* 16*16=256 */
+  dim3 dimGrid(size(ceil_div(M, bM)), /* 4096/128 = 32*/
+               size(ceil_div(N, bN)));/* 4096/128 = 32*/
   gemm_device<<<dimGrid, dimBlock, 0, stream>>>
       (prob_shape, cta_tiler,
        A, dA, sA, copyA,
@@ -320,86 +320,86 @@ gemm_nt(int m, int n, int k,
        alpha, beta);
 }
 
-// Setup params for a TN GEMM
-template <class TA, class TB, class TC,
-          class Alpha, class Beta>
-void
-gemm_tn(int m, int n, int k,
-        Alpha alpha,
-        TA const* A, int ldA,
-        TB const* B, int ldB,
-        Beta beta,
-        TC      * C, int ldC,
-        cudaStream_t stream = 0)
-{
-  using namespace cute;
-
-  // Define shapes (dynamic)
-  auto M = int(m);
-  auto N = int(n);
-  auto K = int(k);
-  auto prob_shape = make_shape(M, N, K);                     // (M, N, K)
-
-  // Define TN strides (mixed)
-  auto dA = make_stride(ldA, Int<1>{});                      // (dM, dK)
-  auto dB = make_stride(ldB, Int<1>{});                      // (dN, dK)
-  auto dC = make_stride(Int<1>{}, ldC);                      // (dM, dN)
-
-  // Define CTA tile sizes (static)
-  auto bM = Int<128>{};
-  auto bN = Int<128>{};
-  auto bK = Int<  8>{};
-  auto cta_tiler = make_shape(bM, bN, bK);                   // (BLK_M, BLK_N, BLK_K)
-
-  // Define the smem layouts (static)
-  auto sA = make_layout(make_shape (      bM,          bK),
-                        make_stride(Int<1>{}, bM+Int<1>{}));        // (m,k) -> smem_idx; padded m-major
-  auto sB = make_layout(make_shape (      bN,          bK),
-                        make_stride(Int<1>{}, bN+Int<1>{}));        // (n,k) -> smem_idx; padded n-major
-  auto sC = make_layout(make_shape(bM, bN));                        // (m,n) -> smem_idx
-
-  // TUTORIAL: Construct TiledCopy to define the Copy_Atom to use and the
-  //           partitioning pattern to apply.
-  // Each thread will copy 1x1 elements of type TA.
-  // Use 32x8 of these threads arranged in k-major.
-
-  TiledCopy copyA = make_tiled_copy(Copy_Atom<UniversalCopy<TA>, TA>{},
-                                    Layout<Shape<_32,_8>,Stride<_8,_1>>{}, // Thr layout 32x8 k-major
-                                    Layout<Shape< _1,_1>>{});              // Val layout  1x1
-  TiledCopy copyB = make_tiled_copy(Copy_Atom<UniversalCopy<TB>, TB>{},
-                                    Layout<Shape<_32,_8>,Stride<_8,_1>>{}, // Thr layout 32x8 k-major
-                                    Layout<Shape< _1,_1>>{});              // Val layout  1x1
-
-  // TUTORIAL: Construct TiledMMA to define the MMA_Atom to use and the
-  //           partitioning pattern to apply.
-  // Use a 1x1x1 FMA on the types TC += TA * TB. Each atom requires a single thread.
-  // Reproduce that atom 16x16x1 times (m-major) across threads so that we use 256 threads.
-
-  TiledMMA mmaC = make_tiled_mma(UniversalFMA<TC,TA,TB>{},
-                                 Layout<Shape<_16,_16,_1>>{});  // 16x16x1 TiledMMA
-
-#if 0
-  print(copyA);
-  print(copyB);
-  print(mmaC);
-#endif
-
-#if 0
-  print_latex(copyA);
-  print_latex(copyB);
-  print_latex(mmaC);
-#endif
-
-  dim3 dimBlock(size(mmaC));
-  dim3 dimGrid(size(ceil_div(M, bM)),
-               size(ceil_div(N, bN)));
-  gemm_device<<<dimGrid, dimBlock, 0, stream>>>
-      (prob_shape, cta_tiler,
-       A, dA, sA, copyA,
-       B, dB, sB, copyB,
-       C, dC, sC, mmaC,
-       alpha, beta);
-}
+//// Setup params for a TN GEMM
+//template <class TA, class TB, class TC,
+//          class Alpha, class Beta>
+//void
+//gemm_tn(int m, int n, int k,
+//        Alpha alpha,
+//        TA const* A, int ldA,
+//        TB const* B, int ldB,
+//        Beta beta,
+//        TC      * C, int ldC,
+//        cudaStream_t stream = 0)
+//{
+//  using namespace cute;
+//
+//  // Define shapes (dynamic)
+//  auto M = int(m);
+//  auto N = int(n);
+//  auto K = int(k);
+//  auto prob_shape = make_shape(M, N, K);                     // (M, N, K)
+//
+//  // Define TN strides (mixed)
+//  auto dA = make_stride(ldA, Int<1>{});                      // (dM, dK)
+//  auto dB = make_stride(ldB, Int<1>{});                      // (dN, dK)
+//  auto dC = make_stride(Int<1>{}, ldC);                      // (dM, dN)
+//
+//  // Define CTA tile sizes (static)
+//  auto bM = Int<128>{};
+//  auto bN = Int<128>{};
+//  auto bK = Int<  8>{};
+//  auto cta_tiler = make_shape(bM, bN, bK);                   // (BLK_M, BLK_N, BLK_K)
+//
+//  // Define the smem layouts (static)
+//  auto sA = make_layout(make_shape (      bM,          bK),
+//                        make_stride(Int<1>{}, bM+Int<1>{}));        // (m,k) -> smem_idx; padded m-major
+//  auto sB = make_layout(make_shape (      bN,          bK),
+//                        make_stride(Int<1>{}, bN+Int<1>{}));        // (n,k) -> smem_idx; padded n-major
+//  auto sC = make_layout(make_shape(bM, bN));                        // (m,n) -> smem_idx
+//
+//  // TUTORIAL: Construct TiledCopy to define the Copy_Atom to use and the
+//  //           partitioning pattern to apply.
+//  // Each thread will copy 1x1 elements of type TA.
+//  // Use 32x8 of these threads arranged in k-major.
+//
+//  TiledCopy copyA = make_tiled_copy(Copy_Atom<UniversalCopy<TA>, TA>{},
+//                                    Layout<Shape<_32,_8>,Stride<_8,_1>>{}, // Thr layout 32x8 k-major
+//                                    Layout<Shape< _1,_1>>{});              // Val layout  1x1
+//  TiledCopy copyB = make_tiled_copy(Copy_Atom<UniversalCopy<TB>, TB>{},
+//                                    Layout<Shape<_32,_8>,Stride<_8,_1>>{}, // Thr layout 32x8 k-major
+//                                    Layout<Shape< _1,_1>>{});              // Val layout  1x1
+//
+//  // TUTORIAL: Construct TiledMMA to define the MMA_Atom to use and the
+//  //           partitioning pattern to apply.
+//  // Use a 1x1x1 FMA on the types TC += TA * TB. Each atom requires a single thread.
+//  // Reproduce that atom 16x16x1 times (m-major) across threads so that we use 256 threads.
+//
+//  TiledMMA mmaC = make_tiled_mma(UniversalFMA<TC,TA,TB>{},
+//                                 Layout<Shape<_16,_16,_1>>{});  // 16x16x1 TiledMMA
+//
+//#if 0
+//  print(copyA);
+//  print(copyB);
+//  print(mmaC);
+//#endif
+//
+//#if 0
+//  print_latex(copyA);
+//  print_latex(copyB);
+//  print_latex(mmaC);
+//#endif
+//
+//  dim3 dimBlock(size(mmaC));
+//  dim3 dimGrid(size(ceil_div(M, bM)),
+//               size(ceil_div(N, bN)));
+//  gemm_device<<<dimGrid, dimBlock, 0, stream>>>
+//      (prob_shape, cta_tiler,
+//       A, dA, sA, copyA,
+//       B, dB, sB, copyB,
+//       C, dC, sC, mmaC,
+//       alpha, beta);
+//}
 
 template <class TA, class TB, class TC,
           class Alpha, class Beta>
@@ -415,9 +415,9 @@ gemm(char transA, char transB, int m, int n, int k,
   if (transA == 'N' && transB == 'T') {
     return gemm_nt(m, n, k, alpha, A, ldA, B, ldB, beta, C, ldC, stream);
   } else
-  if (transA == 'T' && transB == 'N') {
-    return gemm_tn(m, n, k, alpha, A, ldA, B, ldB, beta, C, ldC, stream);
-  }
+  //if (transA == 'T' && transB == 'N') {
+  //  return gemm_tn(m, n, k, alpha, A, ldA, B, ldB, beta, C, ldC, stream);
+  //}
   assert(false && "Not implemented");
 }
 
@@ -473,7 +473,7 @@ int main(int argc, char** argv)
 
   double gflops = (2.0*m*n*k) * 1e-9;
 
-  const int timing_iterations = 100;
+  const int timing_iterations = 1;
   GPU_Clock timer;
 
   int ldA = 0, ldB = 0, ldC = m;
