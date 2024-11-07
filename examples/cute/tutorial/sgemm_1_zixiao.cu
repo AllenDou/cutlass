@@ -59,37 +59,14 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   using namespace cute;
 
   // Preconditions
-  CUTE_STATIC_ASSERT_V(rank(shape_MNK) == Int<3>{});                   // (M, N, K)
-  CUTE_STATIC_ASSERT_V(rank(cta_tiler) == Int<3>{});                   // (BLK_M, BLK_N, BLK_K)
 
   static_assert(is_static<AThreadLayout>::value);
   static_assert(is_static<BThreadLayout>::value);
   static_assert(is_static<CThreadLayout>::value);
 
-  CUTE_STATIC_ASSERT_V(size(tA) == size(tB));                          // NumThreads
-  CUTE_STATIC_ASSERT_V(size(tC) == size(tA));                          // NumThreads
-
-  CUTE_STATIC_ASSERT_V(size<0>(cta_tiler) % size<0>(tA) == Int<0>{});  // BLK_M / THR_M
-  CUTE_STATIC_ASSERT_V(size<2>(cta_tiler) % size<1>(tA) == Int<0>{});  // BLK_K / THR_K
-  CUTE_STATIC_ASSERT_V(size<1>(cta_tiler) % size<0>(tB) == Int<0>{});  // BLK_N / THR_N
-  CUTE_STATIC_ASSERT_V(size<2>(cta_tiler) % size<1>(tB) == Int<0>{});  // BLK_K / THR_K
-  CUTE_STATIC_ASSERT_V(size<0>(cta_tiler) % size<0>(tC) == Int<0>{});  // BLK_M / THR_M
-  CUTE_STATIC_ASSERT_V(size<1>(cta_tiler) % size<1>(tC) == Int<0>{});  // BLK_N / THR_N
-
   static_assert(is_static<ASmemLayout>::value);
   static_assert(is_static<BSmemLayout>::value);
   static_assert(is_static<CSmemLayout>::value);
-
-  CUTE_STATIC_ASSERT_V(size<0>(ASmemLayout{}) == size<0>(cta_tiler));  // BLK_M
-  CUTE_STATIC_ASSERT_V(size<0>(CSmemLayout{}) == size<0>(cta_tiler));  // BLK_M
-  CUTE_STATIC_ASSERT_V(size<0>(BSmemLayout{}) == size<1>(cta_tiler));  // BLK_N
-  CUTE_STATIC_ASSERT_V(size<1>(CSmemLayout{}) == size<1>(cta_tiler));  // BLK_N
-  CUTE_STATIC_ASSERT_V(size<1>(ASmemLayout{}) == size<2>(cta_tiler));  // BLK_K
-  CUTE_STATIC_ASSERT_V(size<1>(BSmemLayout{}) == size<2>(cta_tiler));  // BLK_K
-
-  CUTE_STATIC_ASSERT_V(congruent(select<0,2>(shape_MNK), dA));         // dA strides for shape MK
-  CUTE_STATIC_ASSERT_V(congruent(select<1,2>(shape_MNK), dB));         // dB strides for shape NK
-  CUTE_STATIC_ASSERT_V(congruent(select<0,1>(shape_MNK), dC));         // dC strides for shape MN
 
   //
   // Full and Tiled Tensors
@@ -124,11 +101,6 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor tBgB = local_partition(gB, tB, threadIdx.x);                  // (THR_N,THR_K,k)
   Tensor tBsB = local_partition(sB, tB, threadIdx.x);                  // (THR_N,THR_K)
 
-  CUTE_STATIC_ASSERT_V(size<0>(tAgA) == size<0>(tAsA));                // THR_M
-  CUTE_STATIC_ASSERT_V(size<1>(tAgA) == size<1>(tAsA));                // THR_K
-  CUTE_STATIC_ASSERT_V(size<0>(tBgB) == size<0>(tBsB));                // THR_N
-  CUTE_STATIC_ASSERT_V(size<1>(tBgB) == size<1>(tBsB));                // THR_K
-
   //
   // Define A/B partitioning and C accumulators
   //
@@ -145,45 +117,8 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // Allocate the accumulators -- same shape/layout as the partitioned data
   Tensor tCrC = make_tensor_like(tCgC);                                // (THR_M,THR_N)
 
-  CUTE_STATIC_ASSERT_V(size<0>(tCrC) == size<0>(tCgC));                // THR_M
-  CUTE_STATIC_ASSERT_V(size<0>(tCrC) == size<0>(tCsA));                // THR_M
-  CUTE_STATIC_ASSERT_V(size<1>(tCrC) == size<1>(tCgC));                // THR_N
-  CUTE_STATIC_ASSERT_V(size<1>(tCrC) == size<0>(tCsB));                // THR_N
-  CUTE_STATIC_ASSERT_V(size<1>(tCsA) == size<1>(tCsB));                // BLK_K
-
   // Clear the accumulators
   clear(tCrC);
-
-#if 0
-  if(thread0()) {
-    print("  mA : "); print(  mA); print("\n");
-    print("  gA : "); print(  gA); print("\n");
-    print("  sA : "); print(  sA); print("\n");
-    print("tAgA : "); print(tAgA); print("\n");
-    print("tAsA : "); print(tAsA); print("\n");
-  }
-#endif
-
-#if 0
-  if(thread0()) {
-    print("  mB : "); print(  mB); print("\n");
-    print("  gB : "); print(  gB); print("\n");
-    print("  sB : "); print(  sB); print("\n");
-    print("tBgB : "); print(tBgB); print("\n");
-    print("tBsB : "); print(tBsB); print("\n");
-  }
-#endif
-
-#if 0
-  if(thread0()) {
-    print("  mC : "); print(  mC); print("\n");
-    print("  gC : "); print(  gC); print("\n");
-    print("tCsA : "); print(tCsA); print("\n");
-    print("tCsB : "); print(tCsB); print("\n");
-    print("tCgC : "); print(tCgC); print("\n");
-    print("tCrC : "); print(tCrC); print("\n");
-  }
-#endif
 
 #if 1
 

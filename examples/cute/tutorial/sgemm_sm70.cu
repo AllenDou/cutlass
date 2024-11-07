@@ -206,38 +206,44 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // Load A, B shmem->regs for k_block=0
   copy(tCsA(_,_,0), tCrA(_,_,0));
   copy(tCsB(_,_,0), tCrB(_,_,0));
-  auto K_TILE_MAX  = size<3>(tAgA);
-  auto K_BLOCK_MAX = size<2>(tCrA);
+  auto K_TILE_MAX  = size<3>(tAgA); // = 512
+  auto K_BLOCK_MAX = size<2>(tCrA); // = _8
+
+  if(thread0()) {
+    print("\n");
+    print(K_BLOCK_MAX);
+    print("\n");
+  }
 
   CUTE_NO_UNROLL
-  for (int k_tile = 0; k_tile < K_TILE_MAX; ++k_tile)
+  for (int k_tile = 0; k_tile < K_TILE_MAX /* 512 */; ++k_tile)
   {
     // Pipeline the k-mode of the block registers
     CUTE_UNROLL
-    for (int k_block = 0; k_block < K_BLOCK_MAX; ++k_block)
+    for (int k_block = 0; k_block < K_BLOCK_MAX /* 8 */; ++k_block)
     {
       if (k_block == K_BLOCK_MAX - 1)
       {
         // Copy rmem to smem
         __syncthreads();
-        copy(tArA, tAsA);
-        copy(tBrB, tBsB);
+        copy(tArA, tAsA); // 4个浮点数
+        copy(tBrB, tBsB); // 4个浮点数
         __syncthreads();
       }
 
       // Copy smem to rmem for k_block+1
       int k_block_next = (k_block + 1) % K_BLOCK_MAX;
-      copy(tCsA(_,_,k_block_next), tCrA(_,_,k_block_next));
-      copy(tCsB(_,_,k_block_next), tCrB(_,_,k_block_next));
+      copy(tCsA(_,_,k_block_next), tCrA(_,_,k_block_next)); // 64个浮点数
+      copy(tCsB(_,_,k_block_next), tCrB(_,_,k_block_next)); // 64个浮点数
       if (k_block == 0)
       {
         // Copy gmem to rmem for k_tile+1
         int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
-        copy(copy_a, tAgA(_,_,_,k_tile_next), tArA);
-        copy(copy_b, tBgB(_,_,_,k_tile_next), tBrB);
+        copy(copy_a, tAgA(_,_,_,k_tile_next), tArA); // 4个浮点数
+        copy(copy_b, tBgB(_,_,_,k_tile_next), tBrB); // 4个浮点数
       }
       // Thread-level register gemm for k_block
-      gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
+      gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC); // 都是64个浮点数
     } // k_block
   } // k_tile
 
@@ -369,6 +375,7 @@ gemm_tn(int m, int n, int k,
 
   TiledMMA mmaC = make_tiled_mma(UniversalFMA<TC,TA,TB>{},
                                  Layout<Shape<_16,_16,_1>>{});  // 16x16x1 TiledMMA
+                                 // 16*16=256 是线程数
 
 #if 0
   print(copyA);
