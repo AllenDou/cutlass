@@ -170,6 +170,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // TUTORIAL: Example of partitioning via a TiledMMA
 
   ThrMMA thr_mma = mma.get_slice(threadIdx.x);
+  // mma shape 16*16 m*n
   Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
   Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
   Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
@@ -209,7 +210,6 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   if(thread(9)) {
     print("\n");
     print(thr_mma);
-    print("\n");
   }
 
   if(thread0()) {
