@@ -100,6 +100,15 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);            // (BLK_M,BLK_K)
   Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);            // (BLK_N,BLK_K)
 
+  if(thread0()) {
+    print("\nmA\n");
+    print(cute::layout<>(mA));
+    print("\ngA\n");
+    print(cute::layout<>(gA));
+    print("\nsA\n");
+    print(cute::layout<>(sA));
+  }
+
   //
   // Partition the copying of A and B tiles across the threads
   //
