@@ -180,12 +180,6 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // Allocate the accumulators -- same size as the projected data
   Tensor tCrC = thr_mma.make_fragment_C(tCgC);                         // (MMA,MMA_M,MMA_N)
 
-  if(thread(9)) {
-    print("\n---\n");
-    print(thr_mma);
-    print("---\n");
-  }
-
   if(thread0()) {
     print("\n");
     print("\ntCsA\n");
@@ -212,6 +206,12 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   clear(tCrC);
 
 #if 1
+  if(thread(9)) {
+    print("\n");
+    print(thr_mma);
+    print("\n");
+  }
+
   if(thread0()) {
     print("\n");
     print("sA_layout : "); print(sA_layout); print("\n");
