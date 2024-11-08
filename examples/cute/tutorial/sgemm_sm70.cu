@@ -175,6 +175,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     print(cute::layout<>(tCrB));
     print("\ntCrC\n");
     print(cute::layout<>(tCrC));
+    print("\n");
   }
 
   CUTE_STATIC_ASSERT_V(  shape(tCrA) ==   shape(tCsA));                // (MMA,MMA_M,MMA_K)
@@ -187,7 +188,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // Clear the accumulators
   clear(tCrC);
 
-#if 0
+#if 1
   if(thread0()) {
     print("  mA : "); print(  mA); print("\n");
     print("  gA : "); print(  gA); print("\n");
@@ -198,7 +199,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   }
 #endif
 
-#if 0
+#if 1
   if(thread0()) {
     print("  mB : "); print(  mB); print("\n");
     print("  gB : "); print(  gB); print("\n");
@@ -209,7 +210,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   }
 #endif
 
-#if 0
+#if 1
   if(thread0()) {
     print("  mC : "); print(  mC); print("\n");
     print("  gC : "); print(  gC); print("\n");
