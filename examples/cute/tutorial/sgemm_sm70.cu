@@ -217,6 +217,8 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     print("tCsA : "); print(tCsA); print("\n");
     print("tCsB : "); print(tCsB); print("\n");
     print("tCgC : "); print(tCgC); print("\n");
+    print("tCrA : "); print(tCrA); print("\n");
+    print("tCrB : "); print(tCrB); print("\n");
     print("tCrC : "); print(tCrC); print("\n");
   }
 #endif
