@@ -209,17 +209,19 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   if(thread0()) {
     print("sA_layout : "); print(sA_layout); print("\n");
     print("sB_layout : "); print(sB_layout); print("\n");
+    print("\n");
   }
 #endif
 
 #if 1
   if(thread0()) {
     print("  mA : "); print(  mA); print("\n");
-    print("  gA : "); print(  gA); print("refer cta_tiler\n");
-    print("tAgA : "); print(tAgA); print("refer thr_copy_a\n");
-    print("  sA : "); print(  sA); print("refer sA_layout\n");
+    print("  gA : "); print(  gA); print(" ===> refer cta_tiler\n");
+    print("tAgA : "); print(tAgA); print(" ===> refer thr_copy_a\n");
+    print("  sA : "); print(  sA); print(" ===> refer sA_layout\n");
     print("tAsA : "); print(tAsA); print("\n");
     print("tArA : "); print(tArA); print("\n");
+    print("\n");
   }
 #endif
 
@@ -231,6 +233,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     print("  sB : "); print(  sB); print("\n");
     print("tBsB : "); print(tBsB); print("\n");
     print("tBrB : "); print(tBrB); print("\n");
+    print("\n");
   }
 #endif
 
@@ -244,6 +247,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     print("tCrA : "); print(tCrA); print("\n");
     print("tCrB : "); print(tCrB); print("\n");
     print("tCrC : "); print(tCrC); print("\n");
+    print("\n");
   }
 #endif
 
