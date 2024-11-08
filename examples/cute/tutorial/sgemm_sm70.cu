@@ -320,6 +320,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
       }
       // Thread-level register gemm for k_block
       gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC); // 都是64个浮点数
+      // tCrA相当于是个缓存, 存了8个block的数据, 不一定是同一个block的数据, 有可能跨block.
     } // k_block
   } // k_tile
 
