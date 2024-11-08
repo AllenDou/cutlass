@@ -180,6 +180,12 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // Allocate the accumulators -- same size as the projected data
   Tensor tCrC = thr_mma.make_fragment_C(tCgC);                         // (MMA,MMA_M,MMA_N)
 
+  if(thread(9)) {
+    print("\n---\n");
+    print(thr_mma);
+    print("---\n");
+  }
+
   if(thread0()) {
     print("\n");
     print("\ntCsA\n");
@@ -207,6 +213,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
 
 #if 1
   if(thread0()) {
+    print("\n");
     print("sA_layout : "); print(sA_layout); print("\n");
     print("sB_layout : "); print(sB_layout); print("\n");
     print("\n");
@@ -244,10 +251,10 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     print("  mC : "); print(  mC); print("\n");
     print("  gC : "); print(  gC); print("\n");
     print("tCsA : "); print(tCsA); print("\n");
-    print("tCsB : "); print(tCsB); print("\n");
-    print("tCgC : "); print(tCgC); print("\n");
     print("tCrA : "); print(tCrA); print("\n");
+    print("tCsB : "); print(tCsB); print("\n");
     print("tCrB : "); print(tCrB); print("\n");
+    print("tCgC : "); print(tCgC); print("\n");
     print("tCrC : "); print(tCrC); print("\n");
     print("\n");
   }
