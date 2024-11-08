@@ -108,13 +108,17 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
 
   ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
   Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
+  // 按照 TiledCopy thr_copy_a的shape, 对gA进行切分
   Tensor tAsA = thr_copy_a.partition_D(sA);                            // (CPY,CPY_M,CPY_K)
+  // 按照 TiledCopy thr_copy_a的shape, 对gA进行切分
   // Allocate registers same shape/layout as partitioned data
   Tensor tArA = make_fragment_like(tAsA);                              // (CPY,CPY_M,CPY_K)
 
   ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
   Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
+  // 同上面A一样, 按照thr_copy_b进行切分
   Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
+  // 同上面A一样, 按照thr_copy_b进行切分
   // Allocate registers same shape/layout as partitioned data
   Tensor tBrB = make_fragment_like(tBsB);                              // (CPY,CPY_N,CPY_K)
 
