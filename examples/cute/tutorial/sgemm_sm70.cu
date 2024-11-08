@@ -369,9 +369,9 @@ gemm_nt(int m, int n, int k,
   print_latex(mmaC);
 #endif
 
-  dim3 dimBlock(size(mmaC));
   dim3 dimGrid(size(ceil_div(M, bM)),
                size(ceil_div(N, bN)));
+  dim3 dimBlock(size(mmaC));
   gemm_device<<<dimGrid, dimBlock, 0, stream>>>
       (prob_shape, cta_tiler,
        A, dA, sA, copyA,
