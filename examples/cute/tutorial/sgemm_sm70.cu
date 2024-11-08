@@ -99,9 +99,13 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   __shared__ TB smemB[cosize_v<BSmemLayout>];
   Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);            // (BLK_M,BLK_K)
   Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);            // (BLK_N,BLK_K)
+  // sA_layout & sB_layout的意思是从 A&B矩阵一次取多少放到shared memory里
 
   if(thread0()) {
-    print("\n\nmA\n");
+    print("\n");
+    print("\nsA_layout\n");
+    print(sA_layout);
+    print("\nmA\n");
     print(cute::layout<>(mA));
     print("\ngA\n");
     print(cute::layout<>(gA));
@@ -117,8 +121,11 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
 
   ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
   Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
+  // 从gA上获取 1/256的数据, 256是一个block 256个线程的意思
   Tensor tAsA = thr_copy_a.partition_D(sA);                            // (CPY,CPY_M,CPY_K)
+  // 同上
   Tensor tArA = make_fragment_like(tAsA);                              // (CPY,CPY_M,CPY_K)
+  // tArA 和tAsA 同shape, 从 make_fragment_like() 就能看出来
 
   if(thread0()) {
     print("\n\ntAgA\n");
@@ -133,6 +140,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
   Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
   Tensor tBrB = make_fragment_like(tBsB);                              // (CPY,CPY_N,CPY_K)
+  // 以上同 A 一样
 
   CUTE_STATIC_ASSERT_V(size<1>(tAgA) == size<1>(tAsA));                // CPY_M
   CUTE_STATIC_ASSERT_V(size<1>(tAgA) == size<1>(tArA));                // CPY_M
@@ -187,6 +195,13 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
 
   // Clear the accumulators
   clear(tCrC);
+
+#if 1
+  if(thread0()) {
+    print("sA_layout : "); print(sA_layout); print("\n");
+    print("sB_layout : "); print(sB_layout); print("\n");
+  }
+#endif
 
 #if 1
   if(thread0()) {
