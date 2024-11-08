@@ -207,8 +207,8 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   if(thread0()) {
     print("  mA : "); print(  mA); print("\n");
     print("  gA : "); print(  gA); print("\n");
-    print("  sA : "); print(  sA); print("\n");
     print("tAgA : "); print(tAgA); print("\n");
+    print("  sA : "); print(  sA); print("\n");
     print("tAsA : "); print(tAsA); print("\n");
     print("tArA : "); print(tArA); print("\n");
   }
@@ -218,10 +218,10 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   if(thread0()) {
     print("  mB : "); print(  mB); print("\n");
     print("  gB : "); print(  gB); print("\n");
-    print("  sB : "); print(  sB); print("\n");
     print("tBgB : "); print(tBgB); print("\n");
+    print("  sB : "); print(  sB); print("\n");
     print("tBsB : "); print(tBsB); print("\n");
-    print("tArA : "); print(tArA); print("\n");
+    print("tBrB : "); print(tBrB); print("\n");
   }
 #endif
 
