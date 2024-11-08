@@ -164,6 +164,14 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   clear(tCrC);
 
 #if 1
+  
+  if(thread0()) {
+    print("\n");
+    print("sA_layout : "); print(sA_layout); print("\n");
+    print("sB_layout : "); print(sB_layout); print("\n");
+    print("\n");
+  }
+
   if(thread0()) {
     print("  mA : "); print(  mA); print("\n");
     print("  gA : "); print(  gA); print("\n");
@@ -247,7 +255,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
         tCsB_p = tCsB(_,_,_,smem_pipe_read);
 
         // Commit the smem for smem_pipe_read
-        cp_async_wait<K_PIPE_MAX-2>();
+        cp_async_wait<K_PIPE_MAX-2/* 3-2=1 */>();
         __syncthreads();
       }
 
