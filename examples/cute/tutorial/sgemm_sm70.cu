@@ -164,8 +164,13 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor tCrC = thr_mma.make_fragment_C(tCgC);                         // (MMA,MMA_M,MMA_N)
 
   if(thread0()) {
-    print("\n\ntCrA\n");
+    print("\n");
+    print("\ntCsA\n");
+    print(cute::layout<>(tCsA));
+    print("\ntCrA\n");
     print(cute::layout<>(tCrA));
+    print("\ntCsB\n");
+    print(cute::layout<>(tCsB));
     print("\ntCrB\n");
     print(cute::layout<>(tCrB));
     print("\ntCrC\n");
