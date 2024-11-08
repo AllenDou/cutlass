@@ -131,6 +131,11 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor tArA = make_fragment_like(tAsA);                              // (CPY,CPY_M,CPY_K)
   // tArA 和tAsA 同shape, 从 make_fragment_like() 就能看出来
 
+  if(thread0) {
+    //print(thr_copy_a);
+    //print(cta_tiler);
+  }
+
   if(thread0()) {
     print("\n\ntAgA\n");
     print(cute::layout<>(tAgA));
@@ -210,9 +215,9 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
 #if 1
   if(thread0()) {
     print("  mA : "); print(  mA); print("\n");
-    print("  gA : "); print(  gA); print("\n");
-    print("tAgA : "); print(tAgA); print("\n");
-    print("  sA : "); print(  sA); print("\n");
+    print("  gA : "); print(  gA); print("refer cta_tiler\n");
+    print("tAgA : "); print(tAgA); print("refer thr_copy_a\n");
+    print("  sA : "); print(  sA); print("refer sA_layout\n");
     print("tAsA : "); print(tAsA); print("\n");
     print("tArA : "); print(tArA); print("\n");
   }
