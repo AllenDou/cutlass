@@ -121,16 +121,16 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // PREFETCH
   //
 
-  auto K_PIPE_MAX = size<3>(tAsA);
+  auto K_PIPE_MAX = size<3>(tAsA); /* 3 */
 
   // Total count of tiles
-  int k_tile_count = size<3>(tAgA);
+  int k_tile_count = size<3>(tAgA); /* 512 */
   // Current tile index in gmem to read from
   int k_tile_next = 0;
 
   // Start async loads for all pipes but the last
   CUTE_UNROLL
-  for (int k_pipe = 0; k_pipe < K_PIPE_MAX-1; ++k_pipe) {
+  for (int k_pipe = 0; k_pipe < K_PIPE_MAX-1/*不碰最后一个pipe*/; ++k_pipe) {
     copy(copy_a, tAgA(_,_,_,k_tile_next), tAsA(_,_,_,k_pipe));
     copy(copy_b, tBgB(_,_,_,k_tile_next), tBsB(_,_,_,k_pipe));
     cp_async_fence();
@@ -163,7 +163,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // Clear the accumulators
   clear(tCrC);
 
-#if 0
+#if 1
   if(thread0()) {
     print("  mA : "); print(  mA); print("\n");
     print("  gA : "); print(  gA); print("\n");
@@ -173,7 +173,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   }
 #endif
 
-#if 0
+#if 1
   if(thread0()) {
     print("  mB : "); print(  mB); print("\n");
     print("  gB : "); print(  gB); print("\n");
@@ -183,7 +183,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   }
 #endif
 
-#if 0
+#if 1
   if(thread0()) {
     print("  mC : "); print(  mC); print("\n");
     print("  gC : "); print(  gC); print("\n");
@@ -201,14 +201,14 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // Current pipe index in smem to read from
   int smem_pipe_read  = 0;
   // Current pipe index in smem to write to
-  int smem_pipe_write = K_PIPE_MAX-1;
+  int smem_pipe_write = K_PIPE_MAX-1; // 3 - 1 = 2
 
   // Pipe slice
   Tensor tCsA_p = tCsA(_,_,_,smem_pipe_read);
   Tensor tCsB_p = tCsB(_,_,_,smem_pipe_read);
 
   // Size of the register pipeline
-  auto K_BLOCK_MAX = size<2>(tCrA);
+  auto K_BLOCK_MAX = size<2>(tCrA); // 8
 
   // PREFETCH register pipeline
   if (K_BLOCK_MAX > 1) {
@@ -235,10 +235,10 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   //
 
   CUTE_NO_UNROLL
-  while (k_tile_count > -(K_PIPE_MAX-1))
+  while (k_tile_count > -(K_PIPE_MAX-1)) // -2 
   {
     CUTE_UNROLL
-    for (int k_block = 0; k_block < K_BLOCK_MAX; ++k_block)
+    for (int k_block = 0; k_block < K_BLOCK_MAX /*8*/; ++k_block)
     {
       if (k_block == K_BLOCK_MAX - 1)
       {
