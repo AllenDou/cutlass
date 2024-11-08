@@ -277,6 +277,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
 
   // Load A, B shmem->regs for k_block=0
   copy(tCsA(_,_,0), tCrA(_,_,0));
+  // 把第一个block的A B 先cp 到reg里
   copy(tCsB(_,_,0), tCrB(_,_,0));
   auto K_TILE_MAX  = size<3>(tAgA); // = 512
   auto K_BLOCK_MAX = size<2>(tCrA); // = _8
@@ -307,7 +308,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
       // Copy smem to rmem for k_block+1
       int k_block_next = (k_block + 1) % K_BLOCK_MAX;
       copy(tCsA(_,_,k_block_next), tCrA(_,_,k_block_next)); // 64个浮点数
-      // 把shared memory里的A B cp 到reg里, 准备在reg里计算掉.
+      // 把shared memory里下一个block的A B cp 到reg里, 准备在reg里计算掉.
       copy(tCsB(_,_,k_block_next), tCrB(_,_,k_block_next)); // 64个浮点数
       if (k_block == 0)
       {
