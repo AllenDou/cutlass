@@ -91,8 +91,12 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // Get the appropriate blocks for this thread block
   auto cta_coord = make_coord(blockIdx.x, blockIdx.y, _);              // (m,n,k)
   Tensor gA = local_tile(mA, cta_tiler, cta_coord, Step<_1, X,_1>{});  // (BLK_M,BLK_K,k)
+  // gA 的shape 其实就是 cta(一个block处理的A B C的shape), 见 cta_tiler的shape即可
+  // cta_tiler的shape是 128*128*8(MNK)
   Tensor gB = local_tile(mB, cta_tiler, cta_coord, Step< X,_1,_1>{});  // (BLK_N,BLK_K,k)
+  // 同gA一样, 参考cta_tiler的shape
   Tensor gC = local_tile(mC, cta_tiler, cta_coord, Step<_1,_1, X>{});  // (BLK_M,BLK_N)
+  // 同gA一样, 参考cta_tiler的shape
 
   // Shared memory buffers
   __shared__ TA smemA[cosize_v<ASmemLayout>];
