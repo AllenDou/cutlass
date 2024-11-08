@@ -315,7 +315,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
         // Copy gmem to rmem for k_tile+1
         int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
         copy(copy_a, tAgA(_,_,_,k_tile_next), tArA); // 4个浮点数
-        // 把下一个tile的 远端global的A B cp到 reg里
+        // 把下一个tile的 远端global的A B cp到 reg里, 临时寄存
         copy(copy_b, tBgB(_,_,_,k_tile_next), tBrB); // 4个浮点数
       }
       // Thread-level register gemm for k_block
