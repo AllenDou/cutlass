@@ -215,10 +215,12 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
 
 #if 1
   if(thread0()) {
+    print("cta_tiler shape 128*128*8 MNK\n");
+    print("thr_copy shape 32*8\n");
     print("  mA : "); print(  mA); print("\n");
-    print("  gA : "); print(  gA); print(" ===> refer cta_tiler\n");
-    print("tAgA : "); print(tAgA); print(" ===> refer thr_copy_a\n");
-    print("  sA : "); print(  sA); print(" ===> refer sA_layout\n");
+    print("  gA : "); print(  gA); print("\n");
+    print("tAgA : "); print(tAgA); print("\n");
+    print("  sA : "); print(  sA); print("\n");
     print("tAsA : "); print(tAsA); print("\n");
     print("tArA : "); print(tArA); print("\n");
     print("\n");
