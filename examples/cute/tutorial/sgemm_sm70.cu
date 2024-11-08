@@ -101,7 +101,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);            // (BLK_N,BLK_K)
 
   if(thread0()) {
-    print("\nmA\n");
+    print("\n\nmA\n");
     print(cute::layout<>(mA));
     print("\ngA\n");
     print(cute::layout<>(gA));
@@ -119,6 +119,15 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
   Tensor tAsA = thr_copy_a.partition_D(sA);                            // (CPY,CPY_M,CPY_K)
   Tensor tArA = make_fragment_like(tAsA);                              // (CPY,CPY_M,CPY_K)
+
+  if(thread0()) {
+    print("\n\ntAgA\n");
+    print(cute::layout<>(tAgA));
+    print("\ntAsA\n");
+    print(cute::layout<>(tAsA));
+    print("\ntArA\n");
+    print(cute::layout<>(tAsA));
+  }
 
   ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
   Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
@@ -153,6 +162,15 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor tCrB = thr_mma.make_fragment_B(tCsB);                         // (MMA,MMA_N,MMA_K)
   // Allocate the accumulators -- same size as the projected data
   Tensor tCrC = thr_mma.make_fragment_C(tCgC);                         // (MMA,MMA_M,MMA_N)
+
+  if(thread0()) {
+    print("\n\ntCrA\n");
+    print(cute::layout<>(tCrA));
+    print("\ntCrB\n");
+    print(cute::layout<>(tCrB));
+    print("\ntCrC\n");
+    print(cute::layout<>(tCrC));
+  }
 
   CUTE_STATIC_ASSERT_V(  shape(tCrA) ==   shape(tCsA));                // (MMA,MMA_M,MMA_K)
   CUTE_STATIC_ASSERT_V(  shape(tCrB) ==   shape(tCsB));                // (MMA,MMA_N,MMA_K)
