@@ -294,11 +294,12 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     CUTE_UNROLL
     for (int k_block = 0; k_block < K_BLOCK_MAX /* 8 */; ++k_block)
     {
-      if (k_block == K_BLOCK_MAX - 1)
+      if (k_block == K_BLOCK_MAX /* 8 */ - 1)
       {
         // Copy rmem to smem
         __syncthreads();
         copy(tArA, tAsA); // 4个浮点数
+        // 当前tile快结束时, 把reg里的A B cp到share memory里
         copy(tBrB, tBsB); // 4个浮点数
         __syncthreads();
       }
@@ -306,12 +307,14 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
       // Copy smem to rmem for k_block+1
       int k_block_next = (k_block + 1) % K_BLOCK_MAX;
       copy(tCsA(_,_,k_block_next), tCrA(_,_,k_block_next)); // 64个浮点数
+      // 把shared memory里的A B cp 到reg里, 准备在reg里计算掉.
       copy(tCsB(_,_,k_block_next), tCrB(_,_,k_block_next)); // 64个浮点数
       if (k_block == 0)
       {
         // Copy gmem to rmem for k_tile+1
         int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
         copy(copy_a, tAgA(_,_,_,k_tile_next), tArA); // 4个浮点数
+        // 把下一个tile的 远端global的A B cp到 reg里
         copy(copy_b, tBgB(_,_,_,k_tile_next), tBrB); // 4个浮点数
       }
       // Thread-level register gemm for k_block
