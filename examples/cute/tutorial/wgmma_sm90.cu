@@ -205,8 +205,6 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
 
 #if 1
   if (thread0()) {
-  //if ((warp_idx == 0) && lane_predicate) {
-  //if (blockIdx.x==0 && blockIdx.y==0 && threadIdx.x==0 && threadIdx.y==0) {
     print("\n gA:   "); print(gA);
     print("\n tAgA: "); print(tAgA);
     print("\n sA:   "); print(sA);
