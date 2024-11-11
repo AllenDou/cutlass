@@ -199,21 +199,23 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor tCrC = thr_mma.make_fragment_C(tCgC);                         // (MMA,MMA_M,MMA_N)
   clear(tCrC);
 
+  // Allocate "fragments"
+  Tensor tCrA = thr_mma.make_fragment_A(tCsA);                         // (MMA,MMA_M,MMA_K,PIPE)
+  Tensor tCrB = thr_mma.make_fragment_B(tCsB);                         // (MMA,MMA_N,MMA_K,PIPE)
+
 #if 1
-  //if (thread0()) {
+  if (thread0()) {
   //if ((warp_idx == 0) && lane_predicate) {
-  if (blockIdx.x==0 && blockIdx.y==0 && threadIdx.x==0 && threadIdx.y==0) {
+  //if (blockIdx.x==0 && blockIdx.y==0 && threadIdx.x==0 && threadIdx.y==0) {
     print("\n gA:   "); print(gA);
     print("\n tAgA: "); print(tAgA);
     print("\n sA:   "); print(sA);
     print("\n tAsA: "); print(tAsA);
-    print("\n");
+    print("\n tCsA: "); print(tCsA);
+    print("\n tCrA: "); print(tCrA);
+    print("\n\n");
   }
 #endif
-
-  // Allocate "fragments"
-  Tensor tCrA = thr_mma.make_fragment_A(tCsA);                         // (MMA,MMA_M,MMA_K,PIPE)
-  Tensor tCrB = thr_mma.make_fragment_B(tCsB);                         // (MMA,MMA_N,MMA_K,PIPE)
 
   //
   // PIPELINED MAIN LOOP
