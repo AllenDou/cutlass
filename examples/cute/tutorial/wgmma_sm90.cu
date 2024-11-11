@@ -199,6 +199,13 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor tCrC = thr_mma.make_fragment_C(tCgC);                         // (MMA,MMA_M,MMA_N)
   clear(tCrC);
 
+#if 1
+  print("\n"); print(gA);
+  print("\n"); print(tAgA);
+  print("\n"); print(sA);
+  print("\n"); print(tAsA);
+#endif
+
   // Allocate "fragments"
   Tensor tCrA = thr_mma.make_fragment_A(tCsA);                         // (MMA,MMA_M,MMA_K,PIPE)
   Tensor tCrB = thr_mma.make_fragment_B(tCsB);                         // (MMA,MMA_N,MMA_K,PIPE)
@@ -302,6 +309,7 @@ gemm_nt(int m, int n, int k,
   Tensor mB = make_tensor(B, make_shape(N,K), dB);
 
 #if 1
+  print("\n M=512, N=256, K=1024");
   print("\n bM=128, bN=128, bK=64, bP=3");
   print("\n mA"); print(mA);
   print("\n cta_tiler 128*128*64 MNK\n");
@@ -469,7 +477,7 @@ int main(int argc, char** argv)
 
   if (props.major != 9) {
     std::cout << "This example requires NVIDIA's Hopper Architecture GPU with compute capability 90a\n" << std::endl;
-    //return 0;
+    return 0;
   }
 
 #if defined(CUTLASS_ARCH_MMA_SM90_SUPPORTED)
