@@ -169,14 +169,16 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     print("\n");
     print("sA_layout : "); print(sA_layout); print("\n");
     print("sB_layout : "); print(sB_layout); print("\n");
+    print("\ncta_tiler shape 128*128*8 MNK\n");
+    print("thr_copy shape 32*8\n");
     print("\n");
   }
 
   if(thread0()) {
     print("  mA : "); print(  mA); print("\n");
     print("  gA : "); print(  gA); print("\n");
-    print("  sA : "); print(  sA); print("\n");
     print("tAgA : "); print(tAgA); print("\n");
+    print("  sA : "); print(  sA); print("\n");
     print("tAsA : "); print(tAsA); print("\n");
   }
 #endif
@@ -185,8 +187,8 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   if(thread0()) {
     print("  mB : "); print(  mB); print("\n");
     print("  gB : "); print(  gB); print("\n");
-    print("  sB : "); print(  sB); print("\n");
     print("tBgB : "); print(tBgB); print("\n");
+    print("  sB : "); print(  sB); print("\n");
     print("tBsB : "); print(tBsB); print("\n");
   }
 #endif
@@ -196,10 +198,10 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     print("  mC : "); print(  mC); print("\n");
     print("  gC : "); print(  gC); print("\n");
     print("tCsA : "); print(tCsA); print("\n");
-    print("tCsB : "); print(tCsB); print("\n");
-    print("tCgC : "); print(tCgC); print("\n");
     print("tCrA : "); print(tCrA); print("\n");
+    print("tCsB : "); print(tCsB); print("\n");
     print("tCrB : "); print(tCrB); print("\n");
+    print("tCgC : "); print(tCgC); print("\n");
     print("tCrC : "); print(tCrC); print("\n");
   }
 #endif
@@ -215,13 +217,20 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor tCsA_p = tCsA(_,_,_,smem_pipe_read);
   Tensor tCsB_p = tCsB(_,_,_,smem_pipe_read);
 
+#if 1
+  if(thread0()) {
+    print("tCsA_p : "); print(  tCsA_p); print("\n");
+    print("tCsB_p : "); print(  tCsB_p); print("\n");
+  }
+#endif
+
   // Size of the register pipeline
   auto K_BLOCK_MAX = size<2>(tCrA); // 8
 
   // PREFETCH register pipeline
   if (K_BLOCK_MAX > 1) {
     // Wait until our first prefetched tile is loaded in
-    cp_async_wait<K_PIPE_MAX-2>();
+    cp_async_wait<K_PIPE_MAX-2/* 3 - 2 = 1*/>();
     __syncthreads();
 
     // Prefetch the first rmem from the first k-tile

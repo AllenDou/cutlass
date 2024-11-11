@@ -147,8 +147,8 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   int k_tile = 0;
 
   // Initialize Barriers
-  int warp_idx = cutlass::canonical_warp_idx_sync();
-  int lane_predicate = cute::elect_one_sync();
+  int warp_idx = cutlass::canonical_warp_idx_sync(); //获取warp id
+  int lane_predicate = cute::elect_one_sync(); // warp中选取第一个线程
   uint64_t* producer_mbar = smem.tma_barrier;
   uint64_t* consumer_mbar = smem.mma_barrier;
 
@@ -159,6 +159,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     if ((warp_idx == 0) && lane_predicate) {
       ProducerBarType::init(&producer_mbar[pipe],   1);
       ConsumerBarType::init(&consumer_mbar[pipe], 128);
+      //这个128, 目前怀疑是当前kernel启动时设置的128个thread, 这个128是 SM90_64x64x16_F16F16F16_SS里的
     }
   }
   // Ensure barrier init is complete on all CTAs
@@ -214,8 +215,8 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
 
   // A PipelineState is a circular pipe index [.index()] and a pipe phase [.phase()]
   //   that flips each cycle through K_PIPE_MAX.
-  auto write_state = cutlass::PipelineState<K_PIPE_MAX>();             // TMA writes
   auto read_state  = cutlass::PipelineState<K_PIPE_MAX>();             // MMA  reads
+  auto write_state = cutlass::PipelineState<K_PIPE_MAX>();             // TMA writes
 
   CUTE_NO_UNROLL
   while (k_tile_count > -K_PIPE_MAX)
@@ -236,7 +237,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     ConsumerBarType::arrive(&consumer_mbar[read_pipe]);
     ++read_state;
 
-    if ((warp_idx == 0) && lane_predicate)
+    if ((warp_idx == 0) && lane_predicate)// 第一个warp的第一个线程
     {
       int pipe = write_state.index();
       // Wait for Consumer to complete consumption
@@ -299,6 +300,16 @@ gemm_nt(int m, int n, int k,
   // Create Global memory tensors for TMA inspection
   Tensor mA = make_tensor(A, make_shape(M,K), dA);
   Tensor mB = make_tensor(B, make_shape(N,K), dB);
+
+#if 1
+  print("\n bM=128, bN=128, bK=64, bP=3");
+  print("\n mA"); print(mA);
+  print("\n cta_tiler 128*128*64 MNK\n");
+  print(tiled_mma);
+  print("\n sA"); print(sA);
+  print("\n");
+  print("\n");
+#endif
 
   // Create TMA Atoms with the desired copy operation on the source and destination
   Copy_Atom tmaA = make_tma_atom(SM90_TMA_LOAD{}, mA, sA(_,_,0), make_shape(bM,bK));
@@ -458,7 +469,7 @@ int main(int argc, char** argv)
 
   if (props.major != 9) {
     std::cout << "This example requires NVIDIA's Hopper Architecture GPU with compute capability 90a\n" << std::endl;
-    return 0;
+    //return 0;
   }
 
 #if defined(CUTLASS_ARCH_MMA_SM90_SUPPORTED)
