@@ -316,10 +316,10 @@ gemm_nt(int m, int n, int k,
 #if 1
   print("\n M=512, N=256, K=1024");
   print("\n bM=128, bN=128, bK=64, bP=3");
-  print("\n mA"); print(mA);
+  print("\n mA: "); print(mA);
   print("\n cta_tiler 128*128*64 MNK\n");
   print(tiled_mma);
-  print("\n sA"); print(sA);
+  print("\n sA: "); print(sA);
   print("\n");
   print("\n");
 #endif
