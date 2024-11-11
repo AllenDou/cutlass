@@ -200,10 +200,15 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   clear(tCrC);
 
 #if 1
-  print("\n"); print(gA);
-  print("\n"); print(tAgA);
-  print("\n"); print(sA);
-  print("\n"); print(tAsA);
+  //if (thread0()) {
+  //if ((warp_idx == 0) && lane_predicate) {
+  if (blockIdx.x==0 && blockIdx.y==0 && threadIdx.x==0 && threadIdx.y==0) {
+    print("\n gA:   "); print(gA);
+    print("\n tAgA: "); print(tAgA);
+    print("\n sA:   "); print(sA);
+    print("\n tAsA: "); print(tAsA);
+    print("\n");
+  }
 #endif
 
   // Allocate "fragments"
@@ -525,7 +530,7 @@ int main(int argc, char** argv)
 
   double gflops = (2.0*m*n*k) * 1e-9;
 
-  const int timing_iterations = 100;
+  const int timing_iterations = 1;
   GPU_Clock timer;
 
   int ldA = 0, ldB = 0, ldC = m;
@@ -557,6 +562,7 @@ int main(int argc, char** argv)
   CUTE_CHECK_LAST();
   thrust::host_vector<TC> cute_result = d_C;
 
+#if 0
   // Timing iterations
   timer.start();
   for (int i = 0; i < timing_iterations; ++i) {
@@ -570,6 +576,7 @@ int main(int argc, char** argv)
   double cute_time = timer.seconds() / timing_iterations;
   CUTE_CHECK_LAST();
   printf("CUTE_GEMM:     [%6.1f]GFlop/s  (%6.4f)ms\n", gflops / cute_time, cute_time*1000);
+#endif
 
 #else
 
