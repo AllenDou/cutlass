@@ -236,7 +236,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   while (k_tile_count > -K_PIPE_MAX)
   {
     // Wait for Producer to complete
-    int read_pipe = read_state.index();
+    int read_pipe = read_state.index(); // 获取当前的index_, 第一个是 0
     ProducerBarType::wait(&producer_mbar[read_pipe], read_state.phase());
 
     // MMAs to cover 1 K_TILE
@@ -249,7 +249,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
 
     // Notify that consumption is done
     ConsumerBarType::arrive(&consumer_mbar[read_pipe]);
-    ++read_state;
+    ++read_state; // 使得里面的 index_ 自增
 
     if ((warp_idx == 0) && lane_predicate)// 第一个warp的第一个线程
     {
