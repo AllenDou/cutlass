@@ -174,6 +174,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     {
       // Set expected Tx Bytes after each reset / init
       ProducerBarType::arrive_and_expect_tx(&producer_mbar[pipe], kTmaTransactionBytes);
+      // pipeline长度是3, 把3个空间都写入A B
       copy(tma_a.with(producer_mbar[pipe]), tAgA(_,k_tile), tAsA(_,pipe));
       copy(tma_b.with(producer_mbar[pipe]), tBgB(_,k_tile), tBsB(_,pipe));
     }
