@@ -256,6 +256,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
       int pipe = write_state.index();
       // Wait for Consumer to complete consumption
       ConsumerBarType::wait(&consumer_mbar[pipe], write_state.phase());
+      // !! 此时pipeline的第一个 item 已经被gemm计算完, 需要把 新的k_tile的A B cp到这个已经用完的 item地方, 只是触发, 不等待
       // Set expected Tx Bytes after each reset / init
       ProducerBarType::arrive_and_expect_tx(&producer_mbar[pipe], kTmaTransactionBytes);
       copy(tma_a.with(producer_mbar[pipe]), tAgA(_,k_tile), tAsA(_,pipe));
