@@ -196,6 +196,8 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K,PIPE)
   Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K,PIPE)
   Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
+  // 从gC 和tCgC的shape可以看到 gC的shape 是tCgC的shape的128倍, 也就是128个线程, 128个线程就是4个warp(每个warp 32个t)
+  // 所谓的warpgroup就是4个warp, 共计128个thread
 
   // Allocate accumulators and clear them
   Tensor tCrC = thr_mma.make_fragment_C(tCgC);                         // (MMA,MMA_M,MMA_N)
