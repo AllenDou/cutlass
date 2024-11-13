@@ -152,7 +152,7 @@ struct GemmGivenSchedule {
     cutlass::epilogue::fusion::LinearCombination<ElementC, ElementAccumulator>
   >::CollectiveOp;
 
-using CollectiveMainloop = typename cutlass::gemm::collective::CollectiveBuilder<
+  using CollectiveMainloop = typename cutlass::gemm::collective::CollectiveBuilder<
     ArchTag, OperatorClass,
     ElementA, LayoutA *, AlignmentA,
     ElementB, LayoutB *, AlignmentB,
