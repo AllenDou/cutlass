@@ -342,6 +342,15 @@ gemm_nt(int m, int n, int k,
   dim3 dimCluster(2, 1, 1);
   dim3 dimGrid(round_up(size(ceil_div(m, bM)), dimCluster.x),
                round_up(size(ceil_div(n, bN)), dimCluster.y));
+
+#if 1
+  print("\n dimGrid: "); print(dimGrid);
+  print("\n dimBlock: "); print(dimBlock);
+  print("\n dimCluster: "); print(dimCluster);
+  print("\n smem_size: "); print(smem_size);
+  print("\n");
+#endif
+
   cutlass::ClusterLaunchParams params = {dimGrid, dimBlock, dimCluster, smem_size};
 
   void const* kernel_ptr = reinterpret_cast<void const*>(
