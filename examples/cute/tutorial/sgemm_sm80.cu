@@ -171,6 +171,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     print("sB_layout : "); print(sB_layout); print("\n");
     print("\ncta_tiler shape 128*128*8 MNK\n");
     print("thr_copy shape 32*8\n");
+    print("\n mma: "); print(mma);
     print("\n");
   }
 
