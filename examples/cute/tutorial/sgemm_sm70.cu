@@ -592,6 +592,7 @@ int main(int argc, char** argv)
   CUTE_CHECK_LAST();
   thrust::host_vector<TC> cute_result = d_C;
 
+#if 0
   // Timing iterations
   timer.start();
   for (int i = 0; i < timing_iterations; ++i) {
@@ -605,6 +606,7 @@ int main(int argc, char** argv)
   double cute_time = timer.seconds() / timing_iterations;
   CUTE_CHECK_LAST();
   printf("CUTE_GEMM:     [%6.1f]GFlop/s  (%6.4f)ms\n", gflops / cute_time, cute_time*1000);
+#endif
 
   return 0;
 }
