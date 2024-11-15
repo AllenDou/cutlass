@@ -328,6 +328,7 @@ gemm_nt(int m, int n, int k,
   print("\n mA: "); print(mA);
   print("\n cta_tiler 128*128*64 MNK\n");
   print(tiled_mma);
+  print("\n latex:\n"); print_latex(tiled_mma);
   print("\n sA: "); print(sA);
   print("\n");
   print("\n");
