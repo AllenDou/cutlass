@@ -33,3 +33,7 @@ cutlass_example_add_executable(
   basic_gemm.cu
 )
   
+cutlass_example_add_executable(
+  00_basic_gemm_zixiao
+  basic_gemm_zixiao.cu
+)
