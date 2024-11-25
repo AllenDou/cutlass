@@ -160,7 +160,7 @@ struct Options {
     }
 
     cmd.get_cmd_line_argument("iterations", iterations, 20);
-    cmd.get_cmd_line_argument("warmup_iterations", warmup_iterations, 5);
+    cmd.get_cmd_line_argument("warmup-iterations", warmup_iterations, 5);
     cmd.get_cmd_line_argument("reference-check", reference_check, false);
     cmd.get_cmd_line_argument("scale-A", scale_A, true);
     cmd.get_cmd_line_argument("scale-B", scale_B, true);
