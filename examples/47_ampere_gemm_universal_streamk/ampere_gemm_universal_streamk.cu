@@ -236,7 +236,7 @@ struct Options
   Options(std::string command_name) :
     command_name(command_name),
     help(false),
-    problem_size({2048, 2048, 2048}),
+    problem_size({4096, 4096, 4096}),
     alpha(1.0f),
     beta(0.0f),
     split_k_factor(1),
@@ -409,6 +409,8 @@ Result run(std::string description, Options &options)
     options.tensor_d.host_view(),
     options.tensor_ref_d.host_view());
 
+  std::cout << "  Problem size: " << options.problem_size.m() << 'x' << options.problem_size.n() << 'x' << options.problem_size.k() << std::endl;
+  std::cout << "  Iterations: " << options.iterations << std::endl;
   std::cout << "  Disposition: " << (result.passed ? "Passed" : "Failed") << std::endl;
 
   // Run profiling loop
