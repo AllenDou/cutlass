@@ -106,13 +106,19 @@ template <typename MathOperator>
 using Gemm_ = cutlass::gemm::device::GemmUniversalWithAbsMax<
     ElementA, LayoutA, ElementB, LayoutB, ElementOutput, LayoutC,
     ElementAccumulator, cutlass::arch::OpClassTensorOp, cutlass::arch::Sm89,
+    // ThreadblockShape_,
+    // WarpShape_,
+    // InstructionShape_,
     // cutlass::gemm::GemmShape<128, 64, 128>,
     // cutlass::gemm::GemmShape<64, 32, 128>,
     // cutlass::gemm::GemmShape<16, 8, 32>,
     cutlass::gemm::GemmShape<128, 64, 128>,
     cutlass::gemm::GemmShape<64, 32, 128>,
     cutlass::gemm::GemmShape<16, 8, 32>,
-    EpilogueOutputOp, cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<>, kStages,
+    EpilogueOutputOp,
+    // cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<>,
+    cutlass::gemm::threadblock::GemmSplitKHorizontalThreadblockSwizzle,
+    kStages,
     kAlignmentA, kAlignmentB, MathOperator
   >;
 
