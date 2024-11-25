@@ -106,7 +106,12 @@ template <typename MathOperator>
 using Gemm_ = cutlass::gemm::device::GemmUniversalWithAbsMax<
     ElementA, LayoutA, ElementB, LayoutB, ElementOutput, LayoutC,
     ElementAccumulator, cutlass::arch::OpClassTensorOp, cutlass::arch::Sm89,
-    cutlass::gemm::GemmShape<128, 64, 128>, cutlass::gemm::GemmShape<64, 32, 128>, cutlass::gemm::GemmShape<16, 8, 32>,
+    // cutlass::gemm::GemmShape<128, 64, 128>,
+    // cutlass::gemm::GemmShape<64, 32, 128>,
+    // cutlass::gemm::GemmShape<16, 8, 32>,
+    cutlass::gemm::GemmShape<128, 64, 128>,
+    cutlass::gemm::GemmShape<64, 32, 128>,
+    cutlass::gemm::GemmShape<16, 8, 32>,
     EpilogueOutputOp, cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<>, kStages,
     kAlignmentA, kAlignmentB, MathOperator
   >;
@@ -164,9 +169,9 @@ struct Options {
     cmd.get_cmd_line_argument("beta", beta, 0.f);
 
     int m, n, k;
-    cmd.get_cmd_line_argument("m", m, 1024);
-    cmd.get_cmd_line_argument("n", n, 1024);
-    cmd.get_cmd_line_argument("k", k, 1024);
+    cmd.get_cmd_line_argument("m", m, 25600);
+    cmd.get_cmd_line_argument("n", n, 4096);
+    cmd.get_cmd_line_argument("k", k, 4096);
 
     problem_size = cutlass::gemm::GemmCoord{m, n, k};
   }
@@ -742,6 +747,8 @@ struct TestbedRunner {
     runtime_ms = runtime_ms / float(options.iterations);
     float gflops = options.gflops(runtime_ms / 1000.0f);
 
+    std::cout << "Warm-iterations: " << options.warmup_iterations << std::endl;
+    std::cout << "Iterations: " << options.iterations << std::endl;
     std::cout << "Problem size: " << options.problem_size.m() << 'x' << options.problem_size.n() << 'x' << options.problem_size.k() << std::endl;
     std::cout << "Runtime (ms): " << runtime_ms << std::endl;
     std::cout << "GFLOPs/sec:   " << gflops << std::endl;
