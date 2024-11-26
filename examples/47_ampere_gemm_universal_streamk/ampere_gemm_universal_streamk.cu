@@ -166,7 +166,8 @@ using DeviceGemmBasic = cutlass::gemm::device::GemmUniversal<
     WarpShape,
     InstructionShape,
     EpilogueOp,
-    cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<>,
+    cutlass::gemm::threadblock::GemmIdentityThreadblockSwizzle<8>,
+    //cutlass::gemm::threadblock::GemmSplitKHorizontalThreadblockSwizzle,
     NumStages,
     AlignmentA,
     AlignmentB>;
@@ -242,7 +243,7 @@ struct Options
     split_k_factor(1),
     avail_sms(-1),              // Number of device SMs to use is unlimited
     reference_check(true),
-    iterations(10000)
+    iterations(1000)
   {}
 
   bool valid() const
@@ -409,7 +410,7 @@ Result run(std::string description, Options &options)
     options.tensor_d.host_view(),
     options.tensor_ref_d.host_view());
 
-  std::cout << "  Problem size: " << options.problem_size.m() << 'x' << options.problem_size.n() << 'x' << options.problem_size.k() << std::endl;
+  // std::cout << "  Problem size: " << options.problem_size.m() << 'x' << options.problem_size.n() << 'x' << options.problem_size.k() << std::endl;
   std::cout << "  Iterations: " << options.iterations << std::endl;
   std::cout << "  Disposition: " << (result.passed ? "Passed" : "Failed") << std::endl;
 
