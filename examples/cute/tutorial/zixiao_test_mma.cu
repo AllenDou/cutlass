@@ -129,9 +129,11 @@ int main()
     using MMA = decltype(make_tiled_mma(mma_atom{},
                                         make_layout(Shape<_2, _4, _4>{}),   // thr_layout
                                         make_layout(Shape<_4, _4, _4>{}))); // val_layout
-    // 我的理解, 当前这个mma op处理的数据size是 16*8*16 = 1024, 但是这个mma_atom原子只能处理4*4*4
-    // so, 这个mma op里一共调用 1024/64=32次atom操作, 每个atom有2*4*4=32个thread, so, 这个kernel
-    // 的最大并行度 可以是 32 * 32 = 1024, 当然如果更小也可以, 就是慢, 更多也可以, 也不会更快.
+    // 参考: https://zhuanlan.zhihu.com/p/692078624 
+    // make_tiled_mma第二个和第三个参数。第二个参数make_layout(Shape<_2, _4, _4>{}) 直接决定了
+    // TileMMA的物理配置，在M,N,K维度上都做了2,4,4倍处理，所以整体由32(warp)x2x4x4=1024个线程构成；
+    // 第三个参数make_layout(Shape<_4, _4, _4>{})是逻辑上在MNK上重复的次数，不会影响线程布局.
+
 
     // constexpr int M = 128;
     // constexpr int N = 128;
