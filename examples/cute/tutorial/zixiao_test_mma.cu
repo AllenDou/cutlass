@@ -133,7 +133,7 @@ int main()
     // make_tiled_mma第二个和第三个参数。第二个参数make_layout(Shape<_2, _4, _4>{}) 直接决定了
     // TileMMA的物理配置，在M,N,K维度上都做了2,4,4倍处理，所以整体由32(warp)x2x4x4=1024个线程构成；
     // 第三个参数make_layout(Shape<_4, _4, _4>{})是逻辑上在MNK上重复的次数，不会影响线程布局.
-
+    // !!! 把第二个 val layout 改成 1 1 1, 性能没变化.
 
     // constexpr int M = 128;
     // constexpr int N = 128;
