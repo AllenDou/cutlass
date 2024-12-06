@@ -129,13 +129,17 @@ int main()
     using MMA = decltype(make_tiled_mma(mma_atom{},
                                         make_layout(Shape<_2, _4, _4>{}),   // thr_layout
                                         make_layout(Shape<_4, _4, _4>{}))); // val_layout
+    // 我的理解, 当前这个mma op处理的数据size是 16*8*16 = 1024, 但是这个mma_atom原子只能处理4*4*4
+    // so, 这个mma op里一共调用 1024/64=32次atom操作, 每个atom有2*4*4=32个thread, so, 这个kernel
+    // 的最大并行度 可以是 32 * 32 = 1024, 当然如果更小也可以, 就是慢, 更多也可以, 也不会更快.
+
     // constexpr int M = 128;
     // constexpr int N = 128;
     // constexpr int K = 32;
 
-    constexpr int M = 256;
-    constexpr int N = 256;
-    constexpr int K = 128;
+    constexpr int M = 16;
+    constexpr int N = 8;
+    constexpr int K = 16;
 
     T *Cptr;
     T *Aptr;
