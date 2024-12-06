@@ -137,9 +137,9 @@ int main()
     // constexpr int N = 128;
     // constexpr int K = 32;
 
-    constexpr int M = 16;
-    constexpr int N = 8;
-    constexpr int K = 16;
+    constexpr int M = 256;
+    constexpr int N = 256;
+    constexpr int K = 128;
 
     T *Cptr;
     T *Aptr;
