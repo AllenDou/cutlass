@@ -26,6 +26,7 @@ __global__ void mma_simple(T *Cptr, const T *Aptr, const T *Bptr)
     auto tAgA = thr_mma.partition_A(A); /* 当前线程 从global mem的A 获取一个partition  还是在global memory上 */
     auto tBgB = thr_mma.partition_B(B);
     auto tCgC = thr_mma.partition_C(C);
+    print(tAgA);
 
     auto tArA = thr_mma.partition_fragment_A(A); /* 当前线程从global mem的A获取一个fragment 存在register里 */
     auto tBrB = thr_mma.partition_fragment_B(B);
@@ -56,6 +57,7 @@ __global__ void mma_simple(T *Cptr, const T *Aptr, const T *Bptr)
     // cute::gemm, warp level
     // 语义：处理tCrC, tArA, tBrB 对应的partition前tensor A,B,C的 C= A*B+C, 内部会拆解成大量的mma_atom指令
     cute::gemm(tiled_mma, tCrC, tArA, tBrB, tCrC);
+    print("\nwwwwwww: "); print(tCrC);
 
     // thread level
     cute::copy(tCrC, tCgC);
